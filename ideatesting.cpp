@@ -116,3 +116,7 @@ int main() {
 
     return 0;
 }
+//are you confortable wuth programming concept question makes no sense
+//file handling is ok but the result is not reliable
+//should try to do the code without vectors
+//should give the user options like 1/2/3 in every questions instead of asking them to type
