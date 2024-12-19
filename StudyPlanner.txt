@@ -1,7 +1,7 @@
 Personalized Study Planner:
 
-Course 1:
+Course 1 (MM101):
 Recommended Study Hours: 3-4 hours per week (Moderate priority)
 
-Course 2:
-Recommended Study Hours: 3-4 hours per week (Moderate priority)
+Course 2 (PH101):
+Recommended Study Hours: 1-2 hours per week (Low priority)

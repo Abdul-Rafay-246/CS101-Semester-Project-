@@ -95,7 +95,7 @@ int askQuestions(int courseNumber, string courseName) {
 }
 
 // Function to generate personalized study planner
-void generateStudyPlanner(string courseNames[], int points[], int numCourses) {
+void generateStudyPlanner(string courseNames[], int points[], int numCourses, string routine[], int dailyHours[]) {
     ofstream outFile("StudyPlanner.txt");
 
     if (!outFile) {
@@ -103,23 +103,50 @@ void generateStudyPlanner(string courseNames[], int points[], int numCourses) {
         return;
     }
 
-    outFile << "Personalized Study Planner:\n";
+    outFile << "Personalized Weekly Study Planner:\n";
+    outFile << "----------------------------------\n";
+
+    string daysOfWeek[] = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+
     for (int i = 0; i < numCourses; i++) {
         outFile << "\nCourse " << (i + 1) << " (" << courseNames[i] << "):\n";
-        outFile << "Recommended Study Hours: ";
 
+        // Determine the recommended study hours per week based on points
+        int weeklyHours;
         if (points[i] >= 35) {
-            outFile << "5-6 hours per week (High priority)\n";
+            weeklyHours = 6; // High priority: 5-6 hours
         } else if (points[i] >= 20) {
-            outFile << "3-4 hours per week (Moderate priority)\n";
+            weeklyHours = 4; // Moderate priority: 3-4 hours
         } else {
-            outFile << "1-2 hours per week (Low priority)\n";
+            weeklyHours = 2; // Low priority: 1-2 hours
+        }
+
+        outFile << "Recommended Total Study Hours: " << weeklyHours << " hours/week\n";
+        outFile << "Suggested Weekly Schedule:\n";
+
+        // Allocate hours across the week based on user routine and daily preferences
+        int hoursLeft = weeklyHours;
+        for (int j = 0; j < 7; j++) { // Loop through days of the week
+            if (hoursLeft <= 0) break;
+
+            int dailyStudyTime = min(hoursLeft, dailyHours[j]); // Limit study time per day
+            if (dailyStudyTime > 0) {
+                outFile << "  " << daysOfWeek[j] << ": Study for " << dailyStudyTime 
+                        << " hour(s) in the " << routine[j] << ".\n";
+                hoursLeft -= dailyStudyTime;
+            }
+        }
+
+        // If there are leftover hours, distribute them across available days
+        if (hoursLeft > 0) {
+            outFile << "  Remaining " << hoursLeft << " hour(s) to be adjusted based on availability.\n";
         }
     }
 
     outFile.close();
-    cout << "\nStudy planner has been saved to 'StudyPlanner.txt'.\n";
+    cout << "\nStudy planner with a weekly schedule has been saved to 'StudyPlanner.txt'.\n";
 }
+
 
 // Main function
 int main() {
