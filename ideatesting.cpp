@@ -16,80 +16,70 @@ int getValidInput(int min, int max) {
     }
 }
 
+// Function to convert choice number to routine string
+string convertChoiceToRoutine(int choice) {
+    switch (choice) {
+        case 1: return "Morning";
+        case 2: return "Afternoon";
+        case 3: return "Evening";
+        default: return "Unavailable"; // Fallback, though this should not occur due to validation
+    }
+}
+
 // Function to ask questions for a course and calculate points
 int askQuestions(int courseNumber, string courseName) {
     int points = 0;
     int choice;
-    int creditHours;
 
-    cout << "\nFor Course " << courseNumber << " (" << courseName << "):\n";
+    cout << "\n\nLet's get started with Course " << courseNumber << " (" << courseName << ")!\n";
 
     // Question 1: Have you studied the course previously?
-    cout << "1. Have you studied the course previously?\n";
-    cout << "   1 - Yes\n   2 - No\nYour choice: ";
+    cout << "1. Have you studied this course before?\n";
+    cout << "    1. Yes, I have some prior knowledge\n";
+    cout << "    2. No, I’m starting from scratch\n";
+    cout << "Your choice: ";
     choice = getValidInput(1, 2);
     if (choice == 2) points += 5;
 
     // Question 2: Grade last time in the course
-    cout << "2. What was your grade last time?\n";
-    cout << "   1 - A\n   2 - B\n   3 - C\n   4 - D/F\n   5 - N/A\nYour choice: ";
-    choice = getValidInput(1, 5);
+    cout << "\n2. What was your grade last time you studied this course? (if applicable)\n";
+    cout << "    1. A – I nailed it! 😎\n";
+    cout << "    2. B – Could have done better, but decent.\n";
+    cout << "    3. C – Not the best, but I got through.\n";
+    cout << "    4. D or F – Oops, major struggle! 😬\n";
+    cout << "Your choice: ";
+    choice = getValidInput(1, 4);
     if (choice == 2) points += 2;
     else if (choice == 3) points += 4;
     else if (choice == 4) points += 6;
 
     // Question 3: Complexity level
-    cout << "3. Rate the complexity of the course:\n";
-    cout << "   1 - Easy\n   2 - Moderate\n   3 - Hard\nYour choice: ";
+    cout << "\n3. How would you rate the complexity of this course?\n";
+    cout << "    1. Easy – I can breeze through this! ✌️\n";
+    cout << "    2. Moderate – It’ll be a challenge, but I’m up for it.\n";
+    cout << "    3. Hard – This is going to be a tough one! 😰\n";
+    cout << "Your choice: ";
     choice = getValidInput(1, 3);
     if (choice == 2) points += 3;
     else if (choice == 3) points += 6;
 
     // Question 4: Credit hours
-    cout << "4. How many credit hours is this course? (Enter an integer): ";
-    cin >> creditHours;
-    if (creditHours <= 2) points += 2;
-    else if (creditHours <= 4) points += 4;
-    else points += 6;
+    cout << "\n4. How many credit hours is this course worth?\n";
+    cout << "    1. 1-2 hours – Quick and easy.\n";
+    cout << "    2. 3-4 hours – Average workload.\n";
+    cout << "    3. 5 or more hours – I’ll need to dedicate some serious time! ⏰\n";
+    cout << "Your choice: ";
+    choice = getValidInput(1, 3);
+    if (choice <= 2) points += 2;
+    else if (choice == 3) points += 4;
 
     // Question 5: Is this course core for your degree/major?
-    cout << "5. Is this course core for your degree/major?\n";
-    cout << "   1 - Yes\n   2 - No\nYour choice: ";
+    cout << "\n5. Is this course a core subject for your degree/major?\n";
+    cout << "    1. Yes – It’s essential to my field.\n";
+    cout << "    2. No – Just an elective or side course.\n";
+    cout << "Your choice: ";
     choice = getValidInput(1, 2);
     if (choice == 2) points += 3;
-
-    // Question 6: Most productive time of the day
-    cout << "6. What time of the day are you most productive?\n";
-    cout << "   1 - Morning\n   2 - Afternoon\n   3 - Evening\nYour choice: ";
-    choice = getValidInput(1, 3);
-    // No points assigned, used for scheduling purposes
-
-    // Question 7: Hours you can dedicate
-    cout << "7. How many hours can you dedicate daily to this course?\n";
-    cout << "   1 - 1-2 hours\n   2 - 3-4 hours\n   3 - 5 or more hours\nYour choice: ";
-    choice = getValidInput(1, 3);
-    if (choice == 1) points += 6;
-    else if (choice == 2) points += 3;
-
-    // Question 8: Current understanding of the course
-    cout << "8. What is your current understanding of the course topics?\n";
-    cout << "   1 - Beginner\n   2 - Intermediate\n   3 - Advanced\nYour choice: ";
-    choice = getValidInput(1, 3);
-    if (choice == 1) points += 5;
-    else if (choice == 2) points += 3;
-
-    // Question 9: Confidence in handling course content
-    cout << "9. Do you feel confident about handling this course content?\n";
-    cout << "   1 - Yes\n   2 - Somewhat\n   3 - No\nYour choice: ";
-    choice = getValidInput(1, 3);
-    if (choice == 2) points += 3;
-    else if (choice == 3) points += 6;
-
-    // Question 10: Study preference
-    cout << "10. How do you prefer to study?\n";
-    cout << "   1 - Solo\n   2 - Group\nYour choice: ";
-    choice = getValidInput(1, 2);
-    // No points assigned, used for scheduling purposes
 
     return points;
 }
@@ -147,7 +137,6 @@ void generateStudyPlanner(string courseNames[], int points[], int numCourses, st
     cout << "\nStudy planner with a weekly schedule has been saved to 'StudyPlanner.txt'.\n";
 }
 
-
 // Main function
 int main() {
     int numCourses;
@@ -156,6 +145,18 @@ int main() {
 
     string courseNames[100];
     int points[100]; // Array to store points for each course (max 100 courses)
+    string routine[7];
+    int dailyHours[7];
+
+    cout << "Let's set up your daily routine.\n";
+    string daysOfWeek[] = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+    for (int i = 0; i < 7; i++) {
+        cout << "What part of the day are you free on " << daysOfWeek[i] << "? (1-Morning, 2-Afternoon, 3-Evening): ";
+        int choice = getValidInput(1, 3);
+        routine[i] = convertChoiceToRoutine(choice);
+        cout << "How many hours can you dedicate to studying on " << daysOfWeek[i] << "? ";
+        cin >> dailyHours[i];
+    }
 
     for (int i = 0; i < numCourses; i++) {
         cout << "Enter the name of Course " << (i + 1) << ": ";
@@ -164,7 +165,7 @@ int main() {
         points[i] = askQuestions(i + 1, courseNames[i]);
     }
 
-    generateStudyPlanner(courseNames, points, numCourses);
+    generateStudyPlanner(courseNames, points, numCourses, routine, dailyHours);
 
     return 0;
 }
