@@ -1,80 +1,101 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <vector>
 using namespace std;
 
+// Function to validate input within a range
+int getValidInput(int min, int max) {
+    int choice;
+    while (true) {
+        cin >> choice;
+        if (choice >= min && choice <= max) {
+            return choice;
+        } else {
+            cout << "Invalid input. Please enter a number between " << min << " and " << max << ": ";
+        }
+    }
+}
+
 // Function to ask questions for a course and calculate points
-int askQuestions(int courseNumber) {
+int askQuestions(int courseNumber, string courseName) {
     int points = 0;
-    string input;
+    int choice;
     int creditHours;
 
-    cout << "\nFor Course " << courseNumber << ":\n";
+    cout << "\nFor Course " << courseNumber << " (" << courseName << "):\n";
 
     // Question 1: Have you studied the course previously?
-    cout << "Have you studied the course previously? (yes/no): ";
-    cin >> input;
-    if (input == "no") points += 5;
+    cout << "1. Have you studied the course previously?\n";
+    cout << "   1 - Yes\n   2 - No\nYour choice: ";
+    choice = getValidInput(1, 2);
+    if (choice == 2) points += 5;
 
     // Question 2: Grade last time in the course
-    cout << "What was your grade last time? (A/B/C/D/F or N/A): ";
-    cin >> input;
-    if (input == "B") points += 2;
-    else if (input == "C") points += 4;
-    else if (input == "D" || input == "F") points += 6;
+    cout << "2. What was your grade last time?\n";
+    cout << "   1 - A\n   2 - B\n   3 - C\n   4 - D/F\n   5 - N/A\nYour choice: ";
+    choice = getValidInput(1, 5);
+    if (choice == 2) points += 2;
+    else if (choice == 3) points += 4;
+    else if (choice == 4) points += 6;
 
     // Question 3: Complexity level
-    cout << "Rate the complexity of the course (easy/moderate/hard): ";
-    cin >> input;
-    if (input == "moderate") points += 3;
-    else if (input == "hard") points += 6;
+    cout << "3. Rate the complexity of the course:\n";
+    cout << "   1 - Easy\n   2 - Moderate\n   3 - Hard\nYour choice: ";
+    choice = getValidInput(1, 3);
+    if (choice == 2) points += 3;
+    else if (choice == 3) points += 6;
 
     // Question 4: Credit hours
-    cout << "How many credit hours is this course? (Enter an integer): ";
+    cout << "4. How many credit hours is this course? (Enter an integer): ";
     cin >> creditHours;
     if (creditHours <= 2) points += 2;
     else if (creditHours <= 4) points += 4;
     else points += 6;
 
-    // Question 5: Degree or major
-    cout << "Is this course core for your degree/major? (yes/no): ";
-    cin >> input;
-    if (input == "no") points += 3;
+    // Question 5: Is this course core for your degree/major?
+    cout << "5. Is this course core for your degree/major?\n";
+    cout << "   1 - Yes\n   2 - No\nYour choice: ";
+    choice = getValidInput(1, 2);
+    if (choice == 2) points += 3;
 
     // Question 6: Most productive time of the day
-    cout << "What time of the day are you most productive? (morning/afternoon/evening): ";
-    cin >> input;
+    cout << "6. What time of the day are you most productive?\n";
+    cout << "   1 - Morning\n   2 - Afternoon\n   3 - Evening\nYour choice: ";
+    choice = getValidInput(1, 3);
     // No points assigned, used for scheduling purposes
 
     // Question 7: Hours you can dedicate
-    cout << "How many hours can you dedicate daily to this course? (1-2/3-4/5 or more): ";
-    cin >> input;
-    if (input == "1-2") points += 6;
-    else if (input == "3-4") points += 3;
+    cout << "7. How many hours can you dedicate daily to this course?\n";
+    cout << "   1 - 1-2 hours\n   2 - 3-4 hours\n   3 - 5 or more hours\nYour choice: ";
+    choice = getValidInput(1, 3);
+    if (choice == 1) points += 6;
+    else if (choice == 2) points += 3;
 
     // Question 8: Current understanding of the course
-    cout << "What is your current understanding of the course topics? (beginner/intermediate/advanced): ";
-    cin >> input;
-    if (input == "beginner") points += 5;
-    else if (input == "intermediate") points += 3;
+    cout << "8. What is your current understanding of the course topics?\n";
+    cout << "   1 - Beginner\n   2 - Intermediate\n   3 - Advanced\nYour choice: ";
+    choice = getValidInput(1, 3);
+    if (choice == 1) points += 5;
+    else if (choice == 2) points += 3;
 
-    // Question 9: Comfortable with programming concepts
-    cout << "Are you comfortable with programming concepts? (yes/somewhat/no): ";
-    cin >> input;
-    if (input == "somewhat") points += 3;
-    else if (input == "no") points += 6;
+    // Question 9: Confidence in handling course content
+    cout << "9. Do you feel confident about handling this course content?\n";
+    cout << "   1 - Yes\n   2 - Somewhat\n   3 - No\nYour choice: ";
+    choice = getValidInput(1, 3);
+    if (choice == 2) points += 3;
+    else if (choice == 3) points += 6;
 
     // Question 10: Study preference
-    cout << "How do you prefer to study? (solo/group): ";
-    cin >> input;
+    cout << "10. How do you prefer to study?\n";
+    cout << "   1 - Solo\n   2 - Group\nYour choice: ";
+    choice = getValidInput(1, 2);
     // No points assigned, used for scheduling purposes
 
     return points;
 }
 
 // Function to generate personalized study planner
-void generateStudyPlanner(const vector<int>& points, int numCourses) {
+void generateStudyPlanner(string courseNames[], int points[], int numCourses) {
     ofstream outFile("StudyPlanner.txt");
 
     if (!outFile) {
@@ -84,7 +105,7 @@ void generateStudyPlanner(const vector<int>& points, int numCourses) {
 
     outFile << "Personalized Study Planner:\n";
     for (int i = 0; i < numCourses; i++) {
-        outFile << "\nCourse " << (i + 1) << ":\n";
+        outFile << "\nCourse " << (i + 1) << " (" << courseNames[i] << "):\n";
         outFile << "Recommended Study Hours: ";
 
         if (points[i] >= 35) {
@@ -106,18 +127,17 @@ int main() {
     cout << "How many courses do you need help managing? ";
     cin >> numCourses;
 
-    vector<int> points(numCourses);
+    string courseNames[100];
+    int points[100]; // Array to store points for each course (max 100 courses)
 
     for (int i = 0; i < numCourses; i++) {
-        points[i] = askQuestions(i + 1);
+        cout << "Enter the name of Course " << (i + 1) << ": ";
+        cin.ignore();
+        getline(cin, courseNames[i]);
+        points[i] = askQuestions(i + 1, courseNames[i]);
     }
 
-    generateStudyPlanner(points, numCourses);
+    generateStudyPlanner(courseNames, points, numCourses);
 
     return 0;
 }
-//are you confortable wuth programming concept question makes no sense
-//allow user to write the name of the course
-//file handling is ok but the result is not reliable
-//should try to do the code without vectors
-//should give the user options like 1/2/3 in every questions instead of asking them to type
