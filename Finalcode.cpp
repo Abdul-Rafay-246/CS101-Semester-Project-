@@ -3,6 +3,8 @@
 #include <sstream>
 #include <string>
 #include <algorithm>
+#include <limits>
+
 using namespace std;
 
 void signUp()
@@ -195,16 +197,25 @@ int getValidInput(int min, int max)
     while (true)
     {
         cin >> choice;
-        if (choice >= min && choice <= max)
+
+        // Check if the input stream has encountered a failure (non-integer input)
+        if (cin.fail())
         {
-            return choice;
+            cin.clear(); // Clear the error state
+            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Discard invalid input
+            cout << "Invalid input. Please enter a valid number between " << min << " and " << max << ": ";
+        }
+        else if (choice >= min && choice <= max)
+        {
+            return choice; // Input is valid and within range
         }
         else
         {
-            cout << "Invalid input. Please enter a number between " << min << " and " << max << ": ";
+            cout << "Invalid choice. Please enter a number between " << min << " and " << max << ": ";
         }
     }
 }
+
 
 string convertChoiceToRoutine(int choice)
 {
@@ -312,7 +323,7 @@ void generateStudyPlanner(string courseNames[], int points[], int numCourses, st
     {
         outFile << "\nCourse " << (i + 1) << " (" << courseNames[i] << "):\n";
 
-        // Determine the recommended study hours per week based on points
+        // Determine recommended study hours per week based on points
         int weeklyHours;
         if (points[i] >= 35)
         {
@@ -331,12 +342,14 @@ void generateStudyPlanner(string courseNames[], int points[], int numCourses, st
         outFile << "Suggested Weekly Schedule:\n";
 
         int hoursLeft = weeklyHours;
+
         for (int j = 0; j < 7 && hoursLeft > 0; j++)
         {
+            // Skip days marked as unavailable
             if (routine[j] == "Unavailable")
-                continue; // Skip unavailable days
+                continue;
 
-            // Determine daily availability based on routine and user-defined hours
+            // Calculate max daily hours based on availability
             int maxDailyHours = (routine[j] == "All Day") ? 6 : dailyHours[j];
             int dailyStudyTime = min(hoursLeft, maxDailyHours);
 
@@ -348,15 +361,17 @@ void generateStudyPlanner(string courseNames[], int points[], int numCourses, st
             }
         }
 
+        // Redistribute remaining hours, if any
         if (hoursLeft > 0)
         {
-            outFile << "  Remaining " << hoursLeft << " hour(s) to be adjusted based on availability.\n";
+            outFile << "  Remaining " << hoursLeft << " hour(s) need to be manually scheduled.\n";
         }
     }
 
     outFile.close();
     cout << "\nStudy planner with a weekly schedule has been saved to 'StudyPlanner.txt'.\n";
 }
+
 
 int main()
 {
