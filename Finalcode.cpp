@@ -248,7 +248,7 @@ int askQuestions(int courseNumber, string courseName)
     cout << "Your choice: ";
     choice = getValidInput(1, 2);
     if (choice == 2)
-        points += 5;
+        points += 10;
 
     // Question 2: Grade last time in the course
     cout << "\n2. What was your grade last time you studied this course? (if applicable)\n";
@@ -260,13 +260,11 @@ int askQuestions(int courseNumber, string courseName)
     cout << "Your choice: ";
     choice = getValidInput(1, 5);
     if (choice == 2)
-        points += 2;
-    else if (choice == 3)
         points += 4;
-    else if (choice == 4)
+    else if (choice == 3)
         points += 6;
-    else if (choice == 5)
-        points += 0;
+    else if (choice == 4)
+        points += 10;
 
     // Question 3: Complexity level
     cout << "\n3. How would you rate the complexity of this course?\n";
@@ -276,21 +274,19 @@ int askQuestions(int courseNumber, string courseName)
     cout << "Your choice: ";
     choice = getValidInput(1, 3);
     if (choice == 2)
-        points += 3;
+        points += 5;
     else if (choice == 3)
-        points += 6;
+        points += 10;
 
     // Question 4: Credit hours
     cout << "\n4. How many credit hours is this course worth?\n";
-    cout << "    1. 1-2 (hours Quick and easy.)\n";
-    cout << "    2. 3-4 (hours Average workload.)\n";
-    cout << "    3. 5 or (more hours I'll need to dedicate some serious time!\n)";
+    cout << "    1. 1-2 (Quick and easy.)\n";
+    cout << "    2. 3-4 (Average workload.)\n";
+    cout << "    3. 5 or more (I'll need to dedicate some serious time!)\n";
     cout << "Your choice: ";
     choice = getValidInput(1, 3);
-    if (choice <= 2)
-        points += 2;
-    else if (choice == 3)
-        points += 4;
+    if (choice == 3)
+        points += 5;
 
     // Question 5: Is this course core for your degree/major?
     cout << "\n5. Is this course a core subject for your degree/major?\n";
@@ -299,7 +295,7 @@ int askQuestions(int courseNumber, string courseName)
     cout << "Your choice: ";
     choice = getValidInput(1, 2);
     if (choice == 2)
-        points += 3;
+        points += 5;
 
     return points;
 }
@@ -325,17 +321,17 @@ void generateStudyPlanner(string courseNames[], int points[], int numCourses, st
 
         // Determine recommended study hours per week based on points
         int weeklyHours;
-        if (points[i] >= 35)
+        if (points[i] >= 30)
         {
-            weeklyHours = 6; // High priority: 5-6 hours
+            weeklyHours = 6; // High priority: 6 hours
         }
         else if (points[i] >= 20)
         {
-            weeklyHours = 4; // Moderate priority: 3-4 hours
+            weeklyHours = 4; // Moderate priority: 4 hours
         }
         else
         {
-            weeklyHours = 2; // Low priority: 1-2 hours
+            weeklyHours = 2; // Low priority: 2 hours
         }
 
         outFile << "Recommended Total Study Hours: " << weeklyHours << " hours/week\n";
@@ -353,11 +349,12 @@ void generateStudyPlanner(string courseNames[], int points[], int numCourses, st
             int maxDailyHours = (routine[j] == "All Day") ? 6 : dailyHours[j];
             int dailyStudyTime = min(hoursLeft, maxDailyHours);
 
-            if (dailyStudyTime > 0)
+            if (dailyStudyTime > 0 && dailyStudyTime <= dailyHours[j])
             {
                 outFile << "  " << daysOfWeek[j] << ": Study for " << dailyStudyTime
                         << " hour(s) in the " << routine[j] << ".\n";
                 hoursLeft -= dailyStudyTime;
+                dailyHours[j] -= dailyStudyTime; // Update available hours for the day
             }
         }
 
@@ -371,6 +368,7 @@ void generateStudyPlanner(string courseNames[], int points[], int numCourses, st
     outFile.close();
     cout << "\nStudy planner with a weekly schedule has been saved to 'StudyPlanner.txt'.\n";
 }
+
 
 
 int main()

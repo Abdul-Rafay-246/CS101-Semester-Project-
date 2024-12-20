@@ -1,14 +1,13 @@
 Personalized Weekly Study Planner:
 ----------------------------------
 
-Course 1 (ph101):
+Course 1 (ph):
 Recommended Total Study Hours: 2 hours/week
 Suggested Weekly Schedule:
-  Monday: Study for 2 hour(s) in the Evening.
+  Monday: Study for 2 hour(s) in the Morning.
 
-Course 2 (mm101):
+Course 2 (MM):
 Recommended Total Study Hours: 4 hours/week
 Suggested Weekly Schedule:
-  Monday: Study for 2 hour(s) in the Evening.
-  Tuesday: Study for 1 hour(s) in the Evening.
-  Wednesday: Study for 1 hour(s) in the All Day.
+  Monday: Study for 1 hour(s) in the Morning.
+  Tuesday: Study for 3 hour(s) in the Evening.
