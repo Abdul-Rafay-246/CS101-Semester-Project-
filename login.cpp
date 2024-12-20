@@ -1,21 +1,27 @@
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <algorithm>
+#include <limits>
+
 using namespace std;
 
-void signUp() {
+void signUp()
+{
     string userId, password, confirmPassword, authQuestion, authAnswer;
     cout << "Sign Up\n";
     cout << "Enter User ID: ";
-    cin.ignore(); // Clear any leftover input from the buffer
+    cin.ignore();         // Clear any leftover input from the buffer
     getline(cin, userId); // Use getline to capture full name or multi-word input
     cout << "Enter Password: ";
     cin >> password;
     cout << "Confirm Password: ";
     cin >> confirmPassword;
 
-    if (password != confirmPassword) {
+    if (password != confirmPassword)
+    {
         cout << "Passwords do not match. Try again.\n";
         return;
     }
@@ -28,19 +34,20 @@ void signUp() {
     int questionChoice;
     cin >> questionChoice;
 
-    switch (questionChoice) {
-        case 1:
-            authQuestion = "What was your favorite teacher's name?";
-            break;
-        case 2:
-            authQuestion = "What was the name of your primary school?";
-            break;
-        case 3:
-            authQuestion = "What was your pet's name?";
-            break;
-        default:
-            cout << "Invalid choice. Try again.\n";
-            return;
+    switch (questionChoice)
+    {
+    case 1:
+        authQuestion = "What was your favorite teacher's name?";
+        break;
+    case 2:
+        authQuestion = "What was the name of your primary school?";
+        break;
+    case 3:
+        authQuestion = "What was your pet's name?";
+        break;
+    default:
+        cout << "Invalid choice. Try again.\n";
+        return;
     }
 
     cout << authQuestion << " ";
@@ -49,16 +56,20 @@ void signUp() {
 
     // Save user details to file
     ofstream outFile("user_data.txt", ios::app);
-    if (outFile.is_open()) {
+    if (outFile.is_open())
+    {
         outFile << userId << "," << password << "," << authQuestion << "," << authAnswer << endl;
         cout << "Sign up successful!\n";
-    } else {
+    }
+    else
+    {
         cout << "Error saving user details! Please try again.\n";
     }
     outFile.close();
 }
 
-void login() {
+void login()
+{
     string userId, password;
     cout << "Login\n";
     cout << "Enter User ID: ";
@@ -71,33 +82,42 @@ void login() {
     string line, storedUserId, storedPassword, storedAuthQuestion, storedAuthAnswer;
     bool loginSuccess = false;
 
-    if (inFile.is_open()) {
-        while (getline(inFile, line)) {
+    if (inFile.is_open())
+    {
+        while (getline(inFile, line))
+        {
             stringstream ss(line);
             getline(ss, storedUserId, ',');
             getline(ss, storedPassword, ',');
             getline(ss, storedAuthQuestion, ',');
             getline(ss, storedAuthAnswer);
 
-            if (userId == storedUserId && password == storedPassword) {
+            if (userId == storedUserId && password == storedPassword)
+            {
                 loginSuccess = true;
                 break;
             }
         }
         inFile.close();
-    } else {
+    }
+    else
+    {
         cout << "Error opening user data file.\n";
         return;
     }
 
-    if (loginSuccess) {
+    if (loginSuccess)
+    {
         cout << "Login successful! Welcome, " << userId << "!\n";
-    } else {
+    }
+    else
+    {
         cout << "Invalid User ID or Password. Please try again!\n";
     }
 }
 
-void forgotPassword() {
+void forgotPassword()
+{
     string userId, authAnswer, newPassword, confirmPassword;
     ifstream inFile("user_data.txt");
     ofstream tempFile("temp_data.txt");
@@ -109,37 +129,48 @@ void forgotPassword() {
     cin.ignore();
     getline(cin, userId);
 
-    if (inFile.is_open() && tempFile.is_open()) {
-        while (getline(inFile, line)) {
+    if (inFile.is_open() && tempFile.is_open())
+    {
+        while (getline(inFile, line))
+        {
             stringstream ss(line);
             getline(ss, storedUserId, ',');
             getline(ss, storedPassword, ',');
             getline(ss, storedAuthQuestion, ',');
             getline(ss, storedAuthAnswer);
 
-            if (userId == storedUserId) {
+            if (userId == storedUserId)
+            {
                 userFound = true;
                 cout << storedAuthQuestion << " ";
                 getline(cin, authAnswer);
 
-                if (authAnswer == storedAuthAnswer) {
+                if (authAnswer == storedAuthAnswer)
+                {
                     cout << "Authentication successful! Enter a new password: ";
                     cin >> newPassword;
                     cout << "Confirm new password: ";
                     cin >> confirmPassword;
 
-                    if (newPassword == confirmPassword) {
+                    if (newPassword == confirmPassword)
+                    {
                         tempFile << storedUserId << "," << newPassword << "," << storedAuthQuestion << "," << storedAuthAnswer << endl;
                         cout << "Password successfully changed!\n";
-                    } else {
+                    }
+                    else
+                    {
                         cout << "Passwords do not match. Password not updated.\n";
                         tempFile << line << endl;
                     }
-                } else {
+                }
+                else
+                {
                     cout << "Incorrect authentication answer. Password reset failed.\n";
                     tempFile << line << endl;
                 }
-            } else {
+            }
+            else
+            {
                 tempFile << line << endl;
             }
         }
@@ -149,41 +180,294 @@ void forgotPassword() {
         // Replace original file with updated temp file
         remove("user_data.txt");
         rename("temp_data.txt", "user_data.txt");
-    } else {
+    }
+    else
+    {
         cout << "Error processing user data file.\n";
     }
 
-    if (!userFound) {
+    if (!userFound)
+    {
         cout << "User ID not found.\n";
     }
 }
 
-int main() {
+int getValidInput(int min, int max)
+{
     int choice;
-    while (true) {
-        cout << "\n-------------- Welcome to Personalized Student Study Planner --------------\n\n";
-        cout << "1. To Sign Up (Press 1)\n";
-        cout << "2. To Login (Press 2)\n";
-        cout << "3. Forgot Password (Press 3)\n";
-        cout << "4. To Exit the System (Press 4)\n";
-        cout << "\nEnter your choice: ";
+    while (true)
+    {
         cin >> choice;
 
-        switch (choice) {
-            case 1:
-                signUp();
+        // Check if the input stream has encountered a failure (non-integer input)
+        if (cin.fail())
+        {
+            cin.clear(); // Clear the error state
+            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Discard invalid input
+            cout << "Invalid input. Please enter a valid number between " << min << " and " << max << ": ";
+        }
+        else if (choice >= min && choice <= max)
+        {
+            return choice; // Input is valid and within range
+        }
+        else
+        {
+            cout << "Invalid choice. Please enter a number between " << min << " and " << max << ": ";
+        }
+    }
+}
+
+
+string convertChoiceToRoutine(int choice)
+{
+    switch (choice)
+    {
+    case 1:
+        return "Morning";
+    case 2:
+        return "Afternoon";
+    case 3:
+        return "Evening";
+    case 4:
+        return "All Day"; // New option for complete availability
+    default:
+        return "Unavailable"; // Fallback, though this should not occur due to validation
+    }
+}
+
+int askQuestions(int courseNumber, string courseName)
+{
+    int points = 0;
+    int choice;
+
+    cout << "\n\nLet's get started with Course " << courseNumber << " (" << courseName << ")!\n";
+
+    // Question 1: Have you studied the course previously?
+    cout << "1. Have you studied this course before?\n";
+    cout << "    1. Yes, I have some prior knowledge\n";
+    cout << "    2. No, I’m starting from scratch\n";
+    cout << "Your choice: ";
+    choice = getValidInput(1, 2);
+    if (choice == 2)
+        points += 10;
+
+    // Question 2: Grade last time in the course
+    cout << "\n2. What was your grade last time you studied this course? (if applicable)\n";
+    cout << "    1. A  (I nailed it!)\n";
+    cout << "    2. B  (Could have done better, but decent.)\n";
+    cout << "    3. C  (Not the best, but I got through.)\n";
+    cout << "    4. D or F (Oops, major struggle!)\n";
+    cout << "    5. Not Applicable.\n";
+    cout << "Your choice: ";
+    choice = getValidInput(1, 5);
+    if (choice == 2)
+        points += 4;
+    else if (choice == 3)
+        points += 6;
+    else if (choice == 4)
+        points += 10;
+
+    // Question 3: Complexity level
+    cout << "\n3. How would you rate the complexity of this course?\n";
+    cout << "    1. Easy (I can breeze through this!) \n";
+    cout << "    2. Moderate (It'll be a challenge, but I'm up for it.) \n";
+    cout << "    3. Hard  (This is going to be a tough one!) \n";
+    cout << "Your choice: ";
+    choice = getValidInput(1, 3);
+    if (choice == 2)
+        points += 5;
+    else if (choice == 3)
+        points += 10;
+
+    // Question 4: Credit hours
+    cout << "\n4. How many credit hours is this course worth?\n";
+    cout << "    1. 1-2 (Quick and easy.)\n";
+    cout << "    2. 3-4 (Average workload.)\n";
+    cout << "    3. 5 or more (I'll need to dedicate some serious time!)\n";
+    cout << "Your choice: ";
+    choice = getValidInput(1, 3);
+    if (choice == 3)
+        points += 5;
+
+    // Question 5: Is this course core for your degree/major?
+    cout << "\n5. Is this course a core subject for your degree/major?\n";
+    cout << "    1. Yes (It's essential to my field.)\n";
+    cout << "    2. No (Just an elective or side course.)\n";
+    cout << "Your choice: ";
+    choice = getValidInput(1, 2);
+    if (choice == 2)
+        points += 5;
+
+    return points;
+}
+void generateStudyPlanner(string courseNames[], int points[], int numCourses, string routine[], int originalDailyHours[]) {
+    ofstream outFile("StudyPlanner.txt");
+
+    if (!outFile) {
+        cerr << "Error creating file!" << endl;
+        return;
+    }
+
+    outFile << "Personalized Weekly Study Planner:\n";
+    outFile << "----------------------------------\n";
+
+    string daysOfWeek[] = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+
+    for (int i = 0; i < numCourses; i++) {
+        outFile << "\nCourse " << (i + 1) << " (" << courseNames[i] << "):\n";
+
+        // Determine recommended study hours per week based on points
+        int weeklyHours;
+        if (points[i] >= 30) {
+            weeklyHours = 6; // High priority: 6 hours
+        } else if (points[i] >= 20) {
+            weeklyHours = 4; // Moderate priority: 4 hours
+        } else {
+            weeklyHours = 2; // Low priority: 2 hours
+        }
+
+        outFile << "Recommended Total Study Hours: " << weeklyHours << " hours/week\n";
+        outFile << "Suggested Weekly Schedule:\n";
+
+        int hoursLeft = weeklyHours;
+
+        // Use a fresh copy of daily availability for each course
+        int dailyHours[7];
+        copy(originalDailyHours, originalDailyHours + 7, dailyHours);
+
+        // Assign hours cyclically across all days
+        while (hoursLeft > 0) {
+            bool hoursAssigned = false;
+            for (int j = 0; j < 7 && hoursLeft > 0; j++) {
+                // Skip unavailable days
+                if (routine[j] == "Unavailable")
+                    continue;
+
+                // Calculate max daily hours based on availability
+                int maxDailyHours = (routine[j] == "All Day") ? 6 : dailyHours[j];
+                int dailyStudyTime = min(hoursLeft, maxDailyHours);
+
+                if (dailyStudyTime > 0) {
+                    outFile << "  " << daysOfWeek[j] << ": Study for " << dailyStudyTime
+                            << " hour(s) in the " << routine[j] << ".\n";
+                    hoursLeft -= dailyStudyTime;
+                    dailyHours[j] -= dailyStudyTime; // Update available hours for the day
+                    hoursAssigned = true;
+                }
+            }
+
+            // Break if no hours could be assigned in this iteration
+            if (!hoursAssigned) {
                 break;
-            case 2:
-                login();
-                break;
-            case 3:
-                forgotPassword();
-                break;
-            case 4:
-                cout << "Thank you for using this system. Goodbye!\n";
-                return 0;
-            default:
-                cout << "Invalid choice. Please try again.\n";
+            }
+        }
+
+        // If there are still hours left, note the overflow
+        if (hoursLeft > 0) {
+            outFile << "  Remaining " << hoursLeft << " hour(s) could not be assigned due to limited availability.\n";
+        }
+    }
+
+    outFile.close();
+    cout << "\nStudy planner with a weekly schedule has been saved to 'StudyPlanner.txt'.\n";
+}
+
+
+int main()
+{
+    bool isLoggedIn = false; // Tracks if the user is logged in
+    int choice;
+
+    while (true)
+    {
+        cout << "\n-------------- Welcome to Personalized Student Study Planner --------------\n";
+        cout << "1. Sign Up\n";
+        cout << "2. Login\n";
+        cout << "3. Forgot Password\n";
+        cout << "4. Generate Study Planner (Login Required)\n";
+        cout << "5. Exit\n";
+        cout << "Enter your choice: ";
+        choice = getValidInput(1, 5);
+
+        switch (choice)
+        {
+        case 1:
+            signUp();
+            break;
+        case 2:
+            login();
+            isLoggedIn = true; // Set login state to true on successful login
+            break;
+        case 3:
+            forgotPassword();
+            break;
+        case 4:
+            if (isLoggedIn)
+            {
+                // Get courses and routines from the user
+                cout << "Generating Study Planner...\n";
+
+                int numCourses;
+                cout << "Enter number of courses: ";
+                numCourses = getValidInput(1, 10);
+
+                string courseNames[numCourses];
+                int points[numCourses];
+                for (int i = 0; i < numCourses; i++)
+                {
+                    cout << "Enter name of course " << i + 1 << ": ";
+                    cin.ignore();
+                    getline(cin, courseNames[i]);
+                    points[i] = askQuestions(i + 1, courseNames[i]);
+                }
+
+                string routine[7];
+                int dailyHours[7];
+                string daysOfWeek[] = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+
+               for (int i = 0; i < 7; i++)
+{
+    cout << "Availability on " << daysOfWeek[i] << ":\n";
+    cout << "    1. Morning (3:00 AM - 9:00 AM)\n";
+    cout << "    2. Afternoon (9:00 AM - 3:00 PM)\n";
+    cout << "    3. Evening (3:00 PM - 9:00 PM)\n";
+    cout << "    4. Night (9:00 PM - 3:00 AM)\n";
+    cout << "    5. All Day (24 hours)\n";
+    cout << "    6. Unavailable (0 hours)\n";
+    cout << "Enter your choice: ";
+
+    int choice = getValidInput(1, 6);
+    routine[i] = convertChoiceToRoutine(choice);
+
+    if (choice == 5) // All Day
+    {
+        dailyHours[i] = 12;
+    }
+    else if (choice == 6) // Unavailable
+    {
+        dailyHours[i] = 0;
+    }
+    else // Specific time slots
+    {
+        cout << "Enter number of hours you can study on this day (1 to 6): ";
+        dailyHours[i] = getValidInput(1, 6);
+    }
+
+
+               
+
+                generateStudyPlanner(courseNames, points, numCourses, routine, dailyHours);
+            }
+            }else
+            {
+                cout << "You must log in to access this feature.\n";
+            }
+            break;
+        case 5:
+            cout << "Exiting the application. Goodbye!\n";
+            return 0;
+        default:
+            cout << "Invalid option. Please try again.\n";
         }
     }
 }
