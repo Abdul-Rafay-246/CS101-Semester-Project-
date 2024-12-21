@@ -1,3 +1,4 @@
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -201,7 +202,7 @@ int getValidInput(int min, int max)
         // Check if the input stream has encountered a failure (non-integer input)
         if (cin.fail())
         {
-            cin.clear(); // Clear the error state
+            cin.clear();                                         // Clear the error state
             cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Discard invalid input
             cout << "Invalid input. Please enter a valid number between " << min << " and " << max << ": ";
         }
@@ -215,7 +216,6 @@ int getValidInput(int min, int max)
         }
     }
 }
-
 
 string convertChoiceToRoutine(int choice)
 {
@@ -244,7 +244,7 @@ int askQuestions(int courseNumber, string courseName)
     // Question 1: Have you studied the course previously?
     cout << "1. Have you studied this course before?\n";
     cout << "    1. Yes, I have some prior knowledge\n";
-    cout << "    2. No, I’m starting from scratch\n";
+    cout << "    2. No, I'm starting from scratch\n";
     cout << "Your choice: ";
     choice = getValidInput(1, 2);
     if (choice == 2)
@@ -299,8 +299,7 @@ int askQuestions(int courseNumber, string courseName)
 
     return points;
 }
-
-void generateStudyPlanner(string courseNames[], int points[], int numCourses, string routine[], int dailyHours[])
+void generateStudyPlanner(string courseNames[], int points[], int numCourses, string routine[], int originalDailyHours[])
 {
     ofstream outFile("StudyPlanner.txt");
 
@@ -339,37 +338,51 @@ void generateStudyPlanner(string courseNames[], int points[], int numCourses, st
 
         int hoursLeft = weeklyHours;
 
-        for (int j = 0; j < 7 && hoursLeft > 0; j++)
+        // Use a fresh copy of daily availability for each course
+        int dailyHours[7];
+        copy(originalDailyHours, originalDailyHours + 7, dailyHours);
+
+        // Assign hours cyclically across all days
+        while (hoursLeft > 0)
         {
-            // Skip days marked as unavailable
-            if (routine[j] == "Unavailable")
-                continue;
-
-            // Calculate max daily hours based on availability
-            int maxDailyHours = (routine[j] == "All Day") ? 6 : dailyHours[j];
-            int dailyStudyTime = min(hoursLeft, maxDailyHours);
-
-            if (dailyStudyTime > 0 && dailyStudyTime <= dailyHours[j])
+            bool hoursAssigned = false;
+            for (int j = 0; j < 7 && hoursLeft > 0; j++)
             {
-                outFile << "  " << daysOfWeek[j] << ": Study for " << dailyStudyTime
-                        << " hour(s) in the " << routine[j] << ".\n";
-                hoursLeft -= dailyStudyTime;
-                dailyHours[j] -= dailyStudyTime; // Update available hours for the day
+                // Skip unavailable days
+                if (routine[j] == "Unavailable")
+                    continue;
+
+                // Calculate max daily hours based on availability
+                int maxDailyHours = (routine[j] == "All Day") ? 6 : dailyHours[j];
+                int dailyStudyTime = min(hoursLeft, maxDailyHours);
+
+                if (dailyStudyTime > 0)
+                {
+                    outFile << "  " << daysOfWeek[j] << ": Study for " << dailyStudyTime
+                            << " hour(s) in the " << routine[j] << ".\n";
+                    hoursLeft -= dailyStudyTime;
+                    dailyHours[j] -= dailyStudyTime; // Update available hours for the day
+                    hoursAssigned = true;
+                }
+            }
+
+            // Break if no hours could be assigned in this iteration
+            if (!hoursAssigned)
+            {
+                break;
             }
         }
 
-        // Redistribute remaining hours, if any
+        // If there are still hours left, note the overflow
         if (hoursLeft > 0)
         {
-            outFile << "  Remaining " << hoursLeft << " hour(s) need to be manually scheduled.\n";
+            outFile << "  Remaining " << hoursLeft << " hour(s) could not be assigned due to limited availability.\n";
         }
     }
 
     outFile.close();
     cout << "\nStudy planner with a weekly schedule has been saved to 'StudyPlanner.txt'.\n";
 }
-
-
 
 int main()
 {
@@ -426,31 +439,33 @@ int main()
                 for (int i = 0; i < 7; i++)
                 {
                     cout << "Availability on " << daysOfWeek[i] << ":\n";
-                    cout << "    1. Morning\n";
-                    cout << "    2. Afternoon\n";
-                    cout << "    3. Evening\n";
-                    cout << "    4. All Day\n";
-                    cout << "    5. Unavailable\n";
+                    cout << "    1. Morning (3:00 AM - 9:00 AM)\n";
+                    cout << "    2. Afternoon (9:00 AM - 3:00 PM)\n";
+                    cout << "    3. Evening (3:00 PM - 9:00 PM)\n";
+                    cout << "    4. Night (9:00 PM - 3:00 AM)\n";
+                    cout << "    5. All Day (24 hours)\n";
+                    cout << "    6. Unavailable (0 hours)\n";
                     cout << "Enter your choice: ";
-                    int choice = getValidInput(1, 5);
+
+                    int choice = getValidInput(1, 6);
                     routine[i] = convertChoiceToRoutine(choice);
 
-                    if (choice == 4) // All Day
+                    if (choice == 5) // All Day
                     {
-                        dailyHours[i] = 6;
+                        dailyHours[i] = 12;
                     }
-                    else if (choice != 5) // Not unavailable
-                    {
-                        cout << "Enter number of hours you can study on this day: ";
-                        dailyHours[i] = getValidInput(1, 6);
-                    }
-                    else
+                    else if (choice == 6) // Unavailable
                     {
                         dailyHours[i] = 0;
                     }
-                }
+                    else // Specific time slots
+                    {
+                        cout << "Enter number of hours you can study on this day (1 to 6): ";
+                        dailyHours[i] = getValidInput(1, 6);
+                    }
 
-                generateStudyPlanner(courseNames, points, numCourses, routine, dailyHours);
+                    generateStudyPlanner(courseNames, points, numCourses, routine, dailyHours);
+                }
             }
             else
             {
