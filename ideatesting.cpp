@@ -300,7 +300,7 @@ int askQuestions(int courseNumber, string courseName)
 }
 
 
-void generateStudyPlanner(string courseNames[], int points[], int numCourses, string routine[], int dailyHours[])
+void generateStudyPlanner(string courseNames[], int points[], int numCourses, string routine[][3], int dailyHours[])
 {
     ofstream outFile("StudyPlanner.txt");
 
@@ -319,7 +319,7 @@ void generateStudyPlanner(string courseNames[], int points[], int numCourses, st
     // Initialize totalDailyHours with user's available hours for each day
     for (int i = 0; i < 7; i++)
     {
-        totalDailyHours[i] = (routine[i] == "All Day") ? 6 : dailyHours[i];
+        totalDailyHours[i] = dailyHours[i];
     }
 
     for (int i = 0; i < numCourses; i++)
@@ -349,30 +349,38 @@ void generateStudyPlanner(string courseNames[], int points[], int numCourses, st
         for (int j = 0; j < 7 && hoursLeft > 0; j++)
         {
             // Skip days marked as unavailable
-            if (routine[j] == "Unavailable")
+            if (dailyHours[j] == 0)
                 continue;
 
-            int dailyStudyTime = min(hoursLeft, totalDailyHours[j]);
-
-            if (dailyStudyTime > 0)
+            for (int slot = 0; slot < 3 && hoursLeft > 0; slot++)
             {
-                outFile << "  " << daysOfWeek[j] << ": Study for " << dailyStudyTime
-                        << " hour(s) in the " << routine[j] << ".\n";
-                hoursLeft -= dailyStudyTime;
-                totalDailyHours[j] -= dailyStudyTime; // Update the remaining available hours for the day
+                if (routine[j][slot].empty())
+                    continue;
+
+                int maxDailyHours = (routine[j][slot] == "All Day") ? 6 : dailyHours[j];
+                int dailyStudyTime = min(hoursLeft, maxDailyHours);
+
+                if (dailyStudyTime > 0 && dailyStudyTime <= totalDailyHours[j])
+                {
+                    outFile << "  " << daysOfWeek[j] << ": Study for " << dailyStudyTime
+                            << " hour(s) in the " << routine[j][slot] << ".\n";
+                    hoursLeft -= dailyStudyTime;
+                    totalDailyHours[j] -= dailyStudyTime; // Update the remaining available hours for the day
+                }
             }
         }
 
         // Redistribute remaining hours, if any
         if (hoursLeft > 0)
         {
-            outFile << "  Remaining " << hoursLeft << " should be scheduled in the upcoming week due to unavailabilty of free time slots.\n";
+            outFile << "  Remaining " << hoursLeft << " hour(s) need to be manually scheduled.\n";
         }
     }
 
     outFile.close();
     cout << "\nStudy planner with a weekly schedule has been saved to 'StudyPlanner.txt'.\n";
 }
+
 
 
 int main()
@@ -423,40 +431,44 @@ int main()
                     points[i] = askQuestions(i + 1, courseNames[i]);
                 }
 
-                string routine[7];
-                int dailyHours[7];
+                string routine[7][3]; // Allows up to 3 time slots per day
+                int dailyHours[7];    // Keeps track of total free hours per day
                 string daysOfWeek[] = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
 
                 for (int i = 0; i < 7; i++)
                 {
                     cout << "Availability on " << daysOfWeek[i] << ":\n";
-                    cout << "    1. Morning (3:00 AM - 9:00 AM)\n";
-                    cout << "    2. Afternoon (9:00 AM - 3:00 PM)\n";
-                    cout << "    3. Evening (3:00 PM - 9:00 PM)\n";
-                    cout << "    4. Night (9:00 PM - 3:00 AM)\n";
-                    cout << "    5. All Day (24 hours)\n";
-                    cout << "    6. Unavailable (0 hours)\n";
-                    cout << "Enter your choice: ";
+                    dailyHours[i] = 0; // Initialize daily hours
 
-                    int choice = getValidInput(1, 6);
-                    routine[i] = convertChoiceToRoutine(choice);
+                    for (int slot = 0; slot < 3; slot++)
+                    {
+                        cout << "    1. Morning\n";
+                        cout << "    2. Afternoon\n";
+                        cout << "    3. Evening\n";
+                        cout << "    4. All Day\n";
+                        cout << "    5. Unavailable\n";
+                        cout << "Enter your choice (or 0 to stop): ";
+                        int choice = getValidInput(0, 5);
 
-                    if (choice == 5) // All Day
-                    {
-                        dailyHours[i] = 12;
-                    }
-                    else if (choice == 6) // Unavailable
-                    {
-                        dailyHours[i] = 0;
-                    }
-                    else // Specific time slots
-                    {
-                        cout << "Enter number of hours you can study on this day (1 to 6): ";
-                        dailyHours[i] = getValidInput(1, 6);
-                    }
+                        if (choice == 0)
+                            break;
 
-                    generateStudyPlanner(courseNames, points, numCourses, routine, dailyHours);
+                        routine[i][slot] = convertChoiceToRoutine(choice);
+
+                        if (choice == 4) // All Day
+                        {
+                            dailyHours[i] = 6;
+                            break;
+                        }
+                        else if (choice != 5) // Not unavailable
+                        {
+                            cout << "Enter number of hours you can study in this time slot: ";
+                            dailyHours[i] += getValidInput(1, 6);
+                        }
+                    }
                 }
+
+                generateStudyPlanner(courseNames, points, numCourses, routine, dailyHours);
             }
             else
             {
@@ -471,3 +483,4 @@ int main()
         }
     }
 }
+
