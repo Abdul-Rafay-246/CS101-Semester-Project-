@@ -1,7 +1,19 @@
 Personalized Weekly Study Planner:
 ----------------------------------
 
-Course 1 (2):
-Recommended Total Study Hours: 2 hours/week
+Course 1 (mnb):
+Recommended Total Study Hours: 6 hours/week
 Suggested Weekly Schedule:
-  Monday: Study for 2 hour(s) in the Morning.
+  Monday: Study for 4 hour(s) in the Morning.
+  Tuesday: Study for 2 hour(s) in the Evening.
+
+Course 2 (lkj):
+Recommended Total Study Hours: 6 hours/week
+Suggested Weekly Schedule:
+  Wednesday: Study for 4 hour(s) in the Afternoon.
+  Thursday: Study for 2 hour(s) in the Evening.
+
+Course 3 (tyu):
+Recommended Total Study Hours: 6 hours/week
+Suggested Weekly Schedule:
+  Saturday: Study for 6 hour(s) in the All Day.

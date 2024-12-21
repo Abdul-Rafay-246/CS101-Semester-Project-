@@ -1,3 +1,9 @@
 Total recommended study hours: 2
 Total assigned study hours: 2
 Outstanding study hours: 0
+Total recommended study hours: 18
+Total assigned study hours: 17
+Outstanding study hours: 1
+Total recommended study hours: 18
+Total assigned study hours: 18
+Outstanding study hours: 0

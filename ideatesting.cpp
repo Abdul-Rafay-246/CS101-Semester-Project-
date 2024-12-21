@@ -385,7 +385,7 @@ void generateStudyPlanner(string courseNames[], int points[], int numCourses, st
         for (int j = 0; j < 7 && hoursLeft > 0; j++)
         {
             // Skip days marked as unavailable
-            if (dailyHours[j] == 0)
+            if (totalDailyHours[j] == 0)
                 continue;
 
             for (int slot = 0; slot < 3 && hoursLeft > 0; slot++)
@@ -393,7 +393,7 @@ void generateStudyPlanner(string courseNames[], int points[], int numCourses, st
                 if (routine[j][slot].empty() || routine[j][slot] == "Unavailable")
                     continue;
 
-                int maxDailyHours = (routine[j][slot] == "All Day") ? 6 : min(hoursLeft, dailyHours[j]);
+                int maxDailyHours = (routine[j][slot] == "All Day") ? 6 : dailyHours[j];
                 int dailyStudyTime = min(hoursLeft, maxDailyHours);
 
                 if (dailyStudyTime > 0 && dailyStudyTime <= totalDailyHours[j])
@@ -425,7 +425,6 @@ void generateStudyPlanner(string courseNames[], int points[], int numCourses, st
     outFile.close();
     cout << "\nStudy planner with a weekly schedule has been saved to 'StudyPlanner.txt'.\n";
 }
-
 
 int main()
 {
