@@ -1,7 +1,7 @@
 Personalized Weekly Study Planner:
 ----------------------------------
 
-Course 1 (w):
-Recommended Total Study Hours: 4 hours/week
+Course 1 (2):
+Recommended Total Study Hours: 2 hours/week
 Suggested Weekly Schedule:
-  Monday: Study for 4 hour(s) in the Afternoon.
+  Monday: Study for 2 hour(s) in the Morning.
