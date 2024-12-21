@@ -299,14 +299,45 @@ int askQuestions(int courseNumber, string courseName)
     return points;
 }
 
+void checkStudyRecord(const string &userId)
+{
+    string recordFileName = userId + "_study_record.txt";
+    ifstream recordFile(recordFileName);
 
-void generateStudyPlanner(string courseNames[], int points[], int numCourses, string routine[][3], int dailyHours[])
+    if (!recordFile)
+    {
+        cout << "No study record found for user " << userId << ".\n";
+        return;
+    }
+
+    cout << "\nStudy Record for User: " << userId << "\n";
+    cout << "----------------------------------\n";
+
+    string line;
+    while (getline(recordFile, line))
+    {
+        cout << line << "\n";
+    }
+
+    recordFile.close();
+}
+
+void generateStudyPlanner(string courseNames[], int points[], int numCourses, string routine[][3], int dailyHours[], const string &userId)
 {
     ofstream outFile("StudyPlanner.txt");
 
     if (!outFile)
     {
         cerr << "Error creating file!" << endl;
+        return;
+    }
+
+    string recordFileName = userId + "_study_record.txt";
+    ofstream recordFile(recordFileName, ios::app);
+
+    if (!recordFile)
+    {
+        cerr << "Error creating user record file!" << endl;
         return;
     }
 
@@ -321,6 +352,9 @@ void generateStudyPlanner(string courseNames[], int points[], int numCourses, st
     {
         totalDailyHours[i] = dailyHours[i];
     }
+
+    int totalRecommendedHours = 0;
+    int totalAssignedHours = 0;
 
     for (int i = 0; i < numCourses; i++)
     {
@@ -341,6 +375,8 @@ void generateStudyPlanner(string courseNames[], int points[], int numCourses, st
             weeklyHours = 2; // Low priority: 2 hours
         }
 
+        totalRecommendedHours += weeklyHours;
+
         outFile << "Recommended Total Study Hours: " << weeklyHours << " hours/week\n";
         outFile << "Suggested Weekly Schedule:\n";
 
@@ -354,7 +390,7 @@ void generateStudyPlanner(string courseNames[], int points[], int numCourses, st
 
             for (int slot = 0; slot < 3 && hoursLeft > 0; slot++)
             {
-                if (routine[j][slot].empty())
+                if (routine[j][slot].empty() || routine[j][slot] == "Unavailable")
                     continue;
 
                 int maxDailyHours = (routine[j][slot] == "All Day") ? 6 : dailyHours[j];
@@ -366,6 +402,7 @@ void generateStudyPlanner(string courseNames[], int points[], int numCourses, st
                             << " hour(s) in the " << routine[j][slot] << ".\n";
                     hoursLeft -= dailyStudyTime;
                     totalDailyHours[j] -= dailyStudyTime; // Update the remaining available hours for the day
+                    totalAssignedHours += dailyStudyTime;
                 }
             }
         }
@@ -377,15 +414,22 @@ void generateStudyPlanner(string courseNames[], int points[], int numCourses, st
         }
     }
 
+    int outstandingHours = totalRecommendedHours - totalAssignedHours;
+
+    // Save study record to file
+    recordFile << "Total recommended study hours: " << totalRecommendedHours << "\n";
+    recordFile << "Total assigned study hours: " << totalAssignedHours << "\n";
+    recordFile << "Outstanding study hours: " << outstandingHours << "\n";
+    recordFile.close();
+
     outFile.close();
     cout << "\nStudy planner with a weekly schedule has been saved to 'StudyPlanner.txt'.\n";
 }
 
-
-
 int main()
 {
     bool isLoggedIn = false; // Tracks if the user is logged in
+    string loggedInUser;     // To store the user ID of the logged-in user
     int choice;
 
     while (true)
@@ -395,9 +439,10 @@ int main()
         cout << "2. Login\n";
         cout << "3. Forgot Password\n";
         cout << "4. Generate Study Planner (Login Required)\n";
-        cout << "5. Exit\n";
+        cout << "5. Check Study Record (Login Required)\n";
+        cout << "6. Exit\n";
         cout << "Enter your choice: ";
-        choice = getValidInput(1, 5);
+        choice = getValidInput(1, 6);
 
         switch (choice)
         {
@@ -407,6 +452,9 @@ int main()
         case 2:
             login();
             isLoggedIn = true; // Set login state to true on successful login
+            cout << "Enter your User ID: ";
+            cin.ignore();
+            getline(cin, loggedInUser); // Store the logged-in user ID
             break;
         case 3:
             forgotPassword();
@@ -438,10 +486,14 @@ int main()
                 for (int i = 0; i < 7; i++)
                 {
                     cout << "Availability on " << daysOfWeek[i] << ":\n";
-                    dailyHours[i] = 0; // Initialize daily hours
+                    dailyHours[i] = 0;           // Initialize daily hours
+                    bool dayUnavailable = false; // Flag to track if the day is unavailable
 
                     for (int slot = 0; slot < 3; slot++)
                     {
+                        if (dayUnavailable)
+                            break; // Don't ask again if the day is marked unavailable
+
                         cout << "    1. Morning\n";
                         cout << "    2. Afternoon\n";
                         cout << "    3. Evening\n";
@@ -453,12 +505,40 @@ int main()
                         if (choice == 0)
                             break;
 
+                        if (choice == 5)
+                        {
+                            routine[i][slot] = "Unavailable";
+                            dayUnavailable = true; // Mark the day as unavailable and stop asking for more slots
+                            break;
+                        }
+
+                        // Prevent re-selection of the same time slot
+                        bool invalidSelection = false;
+                        for (int prevSlot = 0; prevSlot < 3; prevSlot++)
+                        {
+                            if ((choice == 1 && routine[i][prevSlot] == "Morning") ||
+                                (choice == 2 && routine[i][prevSlot] == "Afternoon") ||
+                                (choice == 3 && routine[i][prevSlot] == "Evening"))
+                            {
+                                invalidSelection = true;
+                                break;
+                            }
+                        }
+
+                        if (invalidSelection)
+                        {
+                            cout << "Invalid input: You have already selected this time slot. Please choose a different one.\n";
+                            // Give the user a second chance to select a valid slot
+                            slot--; // Keep the same slot index to retry
+                            continue;
+                        }
+
                         routine[i][slot] = convertChoiceToRoutine(choice);
 
                         if (choice == 4) // All Day
                         {
                             dailyHours[i] = 6;
-                            break;
+                            break; // No further slots needed for All Day
                         }
                         else if (choice != 5) // Not unavailable
                         {
@@ -468,7 +548,7 @@ int main()
                     }
                 }
 
-                generateStudyPlanner(courseNames, points, numCourses, routine, dailyHours);
+                generateStudyPlanner(courseNames, points, numCourses, routine, dailyHours, loggedInUser);
             }
             else
             {
@@ -476,6 +556,16 @@ int main()
             }
             break;
         case 5:
+            if (isLoggedIn)
+            {
+                checkStudyRecord(loggedInUser);
+            }
+            else
+            {
+                cout << "You must log in to access this feature.\n";
+            }
+            break;
+        case 6:
             cout << "Exiting the application. Goodbye!\n";
             return 0;
         default:

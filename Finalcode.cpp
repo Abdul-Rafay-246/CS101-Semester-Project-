@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -300,7 +299,6 @@ int askQuestions(int courseNumber, string courseName)
     return points;
 }
 
-
 void generateStudyPlanner(string courseNames[], int points[], int numCourses, string routine[][3], int dailyHours[])
 {
     ofstream outFile("StudyPlanner.txt");
@@ -382,7 +380,6 @@ void generateStudyPlanner(string courseNames[], int points[], int numCourses, st
     cout << "\nStudy planner with a weekly schedule has been saved to 'StudyPlanner.txt'.\n";
 }
 
-
 int main()
 {
     bool isLoggedIn = false; // Tracks if the user is logged in
@@ -438,12 +435,13 @@ int main()
                 for (int i = 0; i < 7; i++)
                 {
                     cout << "Availability on " << daysOfWeek[i] << ":\n";
-                    dailyHours[i] = 0; // Initialize daily hours
+                    dailyHours[i] = 0;           // Initialize daily hours
                     bool dayUnavailable = false; // Flag to track if the day is unavailable
 
                     for (int slot = 0; slot < 3; slot++)
                     {
-                        if (dayUnavailable) break; // Don't ask again if the day is marked unavailable
+                        if (dayUnavailable)
+                            break; // Don't ask again if the day is marked unavailable
 
                         cout << "    1. Morning\n";
                         cout << "    2. Afternoon\n";
@@ -467,8 +465,8 @@ int main()
                         bool invalidSelection = false;
                         for (int prevSlot = 0; prevSlot < 3; prevSlot++)
                         {
-                            if ((choice == 1 && routine[i][prevSlot] == "Morning") || 
-                                (choice == 2 && routine[i][prevSlot] == "Afternoon") || 
+                            if ((choice == 1 && routine[i][prevSlot] == "Morning") ||
+                                (choice == 2 && routine[i][prevSlot] == "Afternoon") ||
                                 (choice == 3 && routine[i][prevSlot] == "Evening"))
                             {
                                 invalidSelection = true;
