@@ -1,0 +1,178 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+using namespace std;
+
+// Function to get valid input from the user
+int getValidInput(int min, int max) {
+    int choice;
+    while (true) {
+        cin >> choice;
+        if (choice >= min && choice <= max) {
+            break;
+        } else {
+            cout << "Invalid choice. Please enter a number between " << min << " and " << max << ": ";
+        }
+    }
+    return choice;
+}
+
+// Function to convert choice to routine string
+string convertChoiceToRoutine(int choice) {
+    switch (choice) {
+        case 1: return "Morning";
+        case 2: return "Afternoon";
+        case 3: return "Evening";
+        case 4: return "All Day";
+        case 5: return "Unavailable";
+        default: return "Invalid";
+    }
+}
+
+// Function to ask questions about course points
+int askQuestions(int courseIndex, string courseName) {
+    int points;
+    cout << "Enter points for " << courseName << " (1 to 10): ";
+    points = getValidInput(1, 10);
+    return points;
+}
+
+// Function to generate the study planner
+void generateStudyPlanner(string courseNames[], int points[], int numCourses, string routine[], int dailyHours[]) {
+    int totalAvailableHours = 0;
+    int totalStudyHours = 0;
+
+    // Calculate total available hours based on the user's input for each day
+    for (int i = 0; i < 7; i++) {
+        totalAvailableHours += dailyHours[i];
+    }
+
+    // Calculate total study hours based on the points of each course (assume each point corresponds to 1 hour)
+    for (int i = 0; i < numCourses; i++) {
+        totalStudyHours += points[i];
+    }
+
+    int extraHours = totalAvailableHours - totalStudyHours;
+
+    // Display the study planner details
+    cout << "\nStudy Planner Generated:\n";
+    for (int i = 0; i < numCourses; i++) {
+        cout << "Course: " << courseNames[i] << " | Points: " << points[i] << "\n";
+    }
+
+    // Display available hours and extra hours
+    cout << "\nTotal Available Hours: " << totalAvailableHours << "\n";
+    cout << "Total Study Hours: " << totalStudyHours << "\n";
+    cout << "Extra Hours Left: " << extraHours << "\n";
+
+    // Save extra hours to a separate file if any extra hours are left
+    if (extraHours > 0) {
+        ofstream extraHoursFile("extra_hours.txt", ios::app);  // Open file in append mode
+        if (extraHoursFile.is_open()) {
+            extraHoursFile << "Extra Hours Left: " << extraHours << " hours\n";
+            extraHoursFile.close();
+            cout << "Extra hours have been saved to 'extra_hours.txt'.\n";
+        } else {
+            cout << "Error opening 'extra_hours.txt' for writing.\n";
+        }
+    }
+}
+
+void signUp() {
+    // Functionality for sign-up (this part is assumed to be implemented)
+    cout << "Sign up functionality goes here.\n";
+}
+
+void login() {
+    // Functionality for login (this part is assumed to be implemented)
+    cout << "Login functionality goes here.\n";
+}
+
+void forgotPassword() {
+    // Functionality for forgot password (this part is assumed to be implemented)
+    cout << "Forgot password functionality goes here.\n";
+}
+
+int main() {
+    bool isLoggedIn = false; // Tracks if the user is logged in
+    int choice;
+
+    while (true) {
+        cout << "\n-------------- Welcome to Personalized Student Study Planner --------------\n";
+        cout << "1. Sign Up\n";
+        cout << "2. Login\n";
+        cout << "3. Forgot Password\n";
+        cout << "4. Generate Study Planner (Login Required)\n";
+        cout << "5. Exit\n";
+        cout << "Enter your choice: ";
+        choice = getValidInput(1, 5);
+
+        switch (choice) {
+        case 1:
+            signUp();  // Sign up functionality
+            break;
+        case 2:
+            login();  // Login functionality
+            isLoggedIn = true; // Set login state to true on successful login
+            break;
+        case 3:
+            forgotPassword();  // Forgot password functionality
+            break;
+        case 4:
+            if (isLoggedIn) {
+                // Get courses and routines from the user
+                cout << "Generating Study Planner...\n";
+
+                int numCourses;
+                cout << "Enter number of courses: ";
+                numCourses = getValidInput(1, 10);
+
+                string courseNames[numCourses];
+                int points[numCourses];
+                for (int i = 0; i < numCourses; i++) {
+                    cout << "Enter name of course " << i + 1 << ": ";
+                    cin.ignore();
+                    getline(cin, courseNames[i]);
+                    points[i] = askQuestions(i + 1, courseNames[i]);
+                }
+
+                string routine[7];
+                int dailyHours[7];
+                string daysOfWeek[] = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+
+                for (int i = 0; i < 7; i++) {
+                    cout << "Availability on " << daysOfWeek[i] << ":\n";
+                    cout << "    1. Morning\n";
+                    cout << "    2. Afternoon\n";
+                    cout << "    3. Evening\n";
+                    cout << "    4. All Day\n";
+                    cout << "    5. Unavailable\n";
+                    cout << "Enter your choice: ";
+                    int choice = getValidInput(1, 5);
+                    routine[i] = convertChoiceToRoutine(choice);
+
+                    if (choice == 4) // All Day
+                    {
+                        dailyHours[i] = 6;
+                    } else if (choice != 5) // Not unavailable
+                    {
+                        cout << "Enter number of hours you can study on this day: ";
+                        dailyHours[i] = getValidInput(1, 6);
+                    } else {
+                        dailyHours[i] = 0;
+                    }
+                }
+
+                generateStudyPlanner(courseNames, points, numCourses, routine, dailyHours);
+            } else {
+                cout << "You must log in to access this feature.\n";
+            }
+            break;
+        case 5:
+            cout << "Exiting the application. Goodbye!\n";
+            return 0;
+        default:
+            cout << "Invalid option. Please try again.\n";
+        }
+    }
+}
